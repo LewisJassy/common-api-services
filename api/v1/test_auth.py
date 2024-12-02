@@ -1,5 +1,8 @@
 import unittest
 from auth import authenticate_user, validate_token, register_user
+import bcrypt
+import jwt
+from datetime import datetime, timedelta
 
 class TestAuth(unittest.TestCase):
 
@@ -10,20 +13,32 @@ class TestAuth(unittest.TestCase):
         register_user("Test", "User", self.email, self.password)
 
     def test_valid_credentials(self):
-        self.assertTrue(authenticate('valid_user', 'valid_password'))
+        token = authenticate_user(self.email, self.password)
+        self.assertIsNotNone(token)
 
     def test_invalid_credentials(self):
-        self.assertFalse(authenticate('invalid_user', 'invalid_password'))
+        with self.assertRaises(ValueError):
+            authenticate_user("invalid@example.com", "wrongpassword")
 
     def test_token_expiration(self):
-        with self.assertRaises(TokenExpiredError):
-            authenticate('user_with_expired_token', 'password')
+        token = jwt.encode(
+            {'email': self.email, 'exp': datetime.utcnow() - timedelta(seconds=1)},
+            'default_secret_key',
+            algorithm='HS256'
+        )
+        with self.assertRaises(ValueError):
+            validate_token(token)
 
     def test_empty_credentials(self):
-        self.assertFalse(authenticate('', ''))
+        with self.assertRaises(ValueError):
+            authenticate_user("", "")
 
     def test_special_characters_in_credentials(self):
-        self.assertTrue(authenticate('user!@#$', 'pass!@#$'))
+        email = "special@example.com"
+        password = "pass!@#$"
+        register_user("Special", "Char", email, password)
+        token = authenticate_user(email, password)
+        self.assertIsNotNone(token)
 
 if __name__ == '__main__':
     unittest.main()
