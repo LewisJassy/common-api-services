@@ -2,6 +2,13 @@ import unittest
 from auth import authenticate_user, validate_token, register_user
 
 class TestAuth(unittest.TestCase):
+
+    def setUp(self):
+        # Set up a test user
+        self.email = "test@example.com"
+        self.password = "password123"
+        register_user("Test", "User", self.email, self.password)
+
     def test_valid_credentials(self):
         self.assertTrue(authenticate('valid_user', 'valid_password'))
 
