@@ -1,5 +1,5 @@
 import unittest
-from auth import authenticate, TokenExpiredError
+from auth import authenticate_user, TokenExpiredError
 
 class TestAuth(unittest.TestCase):
     def test_valid_credentials(self):
