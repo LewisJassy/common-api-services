@@ -10,7 +10,7 @@ class TestAuth(unittest.TestCase):
         # Set up a test user
         self.email = "test@example.com"
         self.password = "password123"
-        register_user("Test", "User", self.email, self.password)
+        register_user(self.email, self.password)
 
     def test_valid_credentials(self):
         token = authenticate_user(self.email, self.password)
