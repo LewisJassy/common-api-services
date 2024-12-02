@@ -30,7 +30,7 @@ def register_user(email:str, password:str) -> dict:
     if email in USER_STORE:
         raise ValueError("Email already registered.")
     
-    hashed_password = bcrypt.haspw(password.encode('utf-8'), bcrypt.gensalt())
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     USER_STORE[email] = {'email': email, 'password': hashed_password}
 
     return {'message': 'User registered successfully.', 'email': email}
