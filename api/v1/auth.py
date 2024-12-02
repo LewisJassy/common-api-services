@@ -14,7 +14,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 # In-memory user store for demo purposes(replace with database in production)
 USER_STORE = {}
 
-def register_user(first_name:str, last_name:str, email:str, password:str) -> dict:
+def register_user(email:str, password:str) -> dict:
     """
     Registers a new user with first name, last name, email, and password.
     Args:
@@ -31,7 +31,7 @@ def register_user(first_name:str, last_name:str, email:str, password:str) -> dic
         raise ValueError("Email already registered.")
     
     hashed_password = bcrypt.haspw(password.encode('utf-8'), bcrypt.gensalt())
-    USER_STORE[email] = {'email': email, 'password': hashed_password, 'first_name': first_name, 'last_name': last_name}
+    USER_STORE[email] = {'email': email, 'password': hashed_password}
 
     return {'message': 'User registered successfully.', 'email': email}
 
