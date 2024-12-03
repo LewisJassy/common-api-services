@@ -1,18 +1,19 @@
 import unittest
-from auth import authenticate_user, validate_token, register_user, USER_STORE
+from auth import authenticate_user, validate_token, register_user, conn, cursor
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
 from faker import Faker
-import random
 
 fake = Faker()
 
 class TestAuth(unittest.TestCase):
 
     def setUp(self):
+        # Clear the database before each test
+        cursor.execute('DELETE FROM users')
+        conn.commit()
         # Set up a test user
-        USER_STORE.clear()
         self.email = fake.email()
         self.password = fake.password()
         register_user(self.email, self.password)
@@ -27,7 +28,7 @@ class TestAuth(unittest.TestCase):
 
     def test_token_expiration(self):
         token = jwt.encode(
-            {'email': self.email, 'exp': datetime.now(UTC) - timedelta(seconds=1)},
+            {'email': self.email, 'exp': datetime.utcnow() - timedelta(seconds=1)},
             'default_secret_key',
             algorithm='HS256'
         )

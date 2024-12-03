@@ -1,42 +1,44 @@
-"""
-auth.py
-
-Provides authentiaction-related functionality, including user login, registration, and OAuth integration.
-"""
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
 import os
+import sqlite3
 
 # Secret key for JWT token generation
 SECRET_KEY = os.getenv('SECRET_KEY', 'default_secret_key')
 
-# In-memory user store for demo purposes(replace with database in production)
-USER_STORE = {}
+# Initialize SQLite database
+conn = sqlite3.connect('users.db')
+cursor = conn.cursor()
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS users (
+    email TEXT PRIMARY KEY,
+    password TEXT
+)
+''')
+conn.commit()
 
-def register_user(email:str, password:str) -> dict:
+def register_user(email: str, password: str) -> dict:
     """
-    Registers a new user with first name, last name, email, and password.
+    Registers a new user with email and password.
     Args:
-        first_name(str): User's first name.
-        last_name(str): User's last name.
         email(str): User's email address.
         password(str): User's password.
     
     Returns:
         dict: User details along with a success message.
     """
-
-    if email in USER_STORE:
+    cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+    if cursor.fetchone():
         raise ValueError("Email already registered.")
     else:
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-        USER_STORE[email] = {'email': email, 'password': hashed_password}
+        cursor.execute('INSERT INTO users (email, password) VALUES (?, ?)', (email, hashed_password))
+        conn.commit()
 
     return {'message': 'User registered successfully.', 'email': email}
 
-
-def authenticate_user(email: str, password: str) ->str:
+def authenticate_user(email: str, password: str) -> str:
     """
     Authenticate a user by verifying the email and password.
 
@@ -47,21 +49,21 @@ def authenticate_user(email: str, password: str) ->str:
     Returns:
         str: JWT token if the user is authenticated, otherwise None.
     """
-
-    user = USER_STORE.get(email)
-    if not user or not bcrypt.checkpw(password.encode('utf-8'), user['password']):
+    cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+    user = cursor.fetchone()
+    if not user or not bcrypt.checkpw(password.encode('utf-8'), user[1]):
         raise ValueError('Invalid email or password')
     
     token = jwt.encode(
-        {'email': email, 'exp': datetime.now(UTC) + timedelta(minutes=30)},
+        {'email': email, 'exp': datetime.utcnow() + timedelta(minutes=30)},
         SECRET_KEY,
         algorithm='HS256'
     )
 
     return token
 
-def validate_token(token:str) -> dict:
-    """"
+def validate_token(token: str) -> dict:
+    """
     Validate a JWT token and decodes its payload.
 
     Args:
@@ -82,8 +84,7 @@ def validate_token(token:str) -> dict:
     except jwt.InvalidTokenError:
         raise ValueError('Invalid token')
 
-
-def oauth_login(provider:str, token:str) -> dict:
+def oauth_login(provider: str, token: str) -> dict:
     """
     Handles OAuth-based login
 
@@ -95,14 +96,11 @@ def oauth_login(provider:str, token:str) -> dict:
         dict: User details if the login is successful, otherwise None.
     
     Note:
-        Replace tis function's implementation with the provider-specific API calls
+        Replace this function's implementation with the provider-specific API calls
     """
-
     if provider.lower() == "google" and token == "google_token":
-        return {"message": "Google login successful", "email": "user@gooogle.com"}
+        return {"message": "Google login successful", "email": "user@google.com"}
     elif provider.lower() == "facebook" and token == "facebook_token":
         return {"message": "Facebook login successful", "email": "user@facebook.com"}
     else:
         return {"message": "Invalid OAuth provider or token"}
-    
-
