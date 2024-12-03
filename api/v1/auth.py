@@ -53,7 +53,7 @@ def authenticate_user(email: str, password: str) ->str:
         raise ValueError('Invalid email or password')
     
     token = jwt.encode(
-        {'email': email, 'exp': datetime.utcnow() + timedelta(minutes=30)},
+        {'email': email, 'exp': datetime.now(UTC) + timedelta(minutes=30)},
         SECRET_KEY,
         algorithm='HS256'
     )
