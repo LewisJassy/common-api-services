@@ -27,7 +27,7 @@ class TestAuth(unittest.TestCase):
 
     def test_token_expiration(self):
         token = jwt.encode(
-            {'email': self.email, 'exp': datetime.utcnow() - timedelta(seconds=1)},
+            {'email': self.email, 'exp': datetime.now(UTC) - timedelta(seconds=1)},
             'default_secret_key',
             algorithm='HS256'
         )
