@@ -1,15 +1,20 @@
 import unittest
-from auth import authenticate_user, validate_token, register_user
+from auth import authenticate_user, validate_token, register_user, USER_STORE
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
+from faker import Faker
+import random
+
+fake = Faker()
 
 class TestAuth(unittest.TestCase):
 
     def setUp(self):
         # Set up a test user
-        self.email = "test@example.com"
-        self.password = "password123"
+        USER_STORE.clear()
+        self.email = fake.email()
+        self.password = fake.password()
         register_user(self.email, self.password)
 
     def test_valid_credentials(self):
