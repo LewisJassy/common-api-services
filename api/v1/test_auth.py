@@ -1,10 +1,9 @@
 import unittest
-from auth import authenticate_user, validate_token, register_user, USER_STORE
+from auth import authenticate_user, validate_token, register_user
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
 from faker import Faker
-import random
 
 fake = Faker()
 
@@ -12,9 +11,8 @@ class TestAuth(unittest.TestCase):
 
     def setUp(self):
         # Set up a test user
-        USER_STORE.clear()
-        self.email = fake.email()
-        self.password = fake.password()
+        self.email = "test@example.com"
+        self.password = "password123"
         register_user(self.email, self.password)
 
     def test_valid_credentials(self):
@@ -41,7 +39,7 @@ class TestAuth(unittest.TestCase):
     def test_special_characters_in_credentials(self):
         email = "special@example.com"
         password = "pass!@#$"
-        register_user(email, password)
+        register_user("Special", "Char", email, password)
         token = authenticate_user(email, password)
         self.assertIsNotNone(token)
 
