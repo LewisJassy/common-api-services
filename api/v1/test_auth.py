@@ -41,7 +41,7 @@ class TestAuth(unittest.TestCase):
     def test_special_characters_in_credentials(self):
         email = "special@example.com"
         password = "pass!@#$"
-        register_user("Special", "Char", email, password)
+        register_user(email, password)
         token = authenticate_user(email, password)
         self.assertIsNotNone(token)
 
