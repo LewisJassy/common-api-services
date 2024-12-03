@@ -49,7 +49,7 @@ def authenticate_user(email: str, password: str) ->str:
     """
 
     user = USER_STORE.get(email)
-    if not user or bcrypt.checkpw(password.encode('utf-8'), user['password']):
+    if not user or not bcrypt.checkpw(password.encode('utf-8'), user['password']):
         raise ValueError('Invalid email or password')
     
     token = jwt.encode(
