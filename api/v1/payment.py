@@ -2,15 +2,18 @@ import stripe
 import paypalrestsdk
 import os
 
+STRIPEAPI = os.getenv('STRIPE_SECRET_KEY')
+PAYPAL_CLIENT_ID = os.getenv('PAYPAL_CLIENT_ID')
+PAYPAL_CLIENT_SECRET = os.getenv('PAYPAL_CLIENT_SECRET')
 
 class PaymentProcessor:
-    def __init_(self):
-        stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
+    def __init__(self):
+        stripe.api_key = STRIPEAPI
 
         paypalrestsdk.configure({
             "mode": "sandbox",
-            "client_id": os.getenv('PAYPAL_CLIENT_ID'),
-            "client_secret": os.getenv('PAYPAL_CLIENT_SECRET')
+            "client_id": PAYPAL_CLIENT_ID,
+            "client_secret": PAYPAL_CLIENT_SECRET
         })
 
     def stripe_payment(self, amount, currency, payment_method_id, description):
@@ -83,4 +86,14 @@ class PaymentProcessor:
         except Exception as e:
             return str(e)
         
-    
+if __name__ == '__main__':
+    processor = PaymentProcessor()
+
+    # Example usage
+    # Create a new Stripe payment
+    payment = processor.stripe_payment(1000, "usd", "pm_card_visa", "Test payment")
+    print("Stripe Payment ID:", payment.id if hasattr(payment, 'id') else payment)
+
+    # Create a new PayPal payment
+    payment = processor.paypal_payment(100, "USD", "http://localhost:5000/return", "http://localhost:5000/cancel")
+    print("PayPal Payment ID:", payment.id if hasattr(payment, 'id') else payment)
